@@ -7,6 +7,11 @@ Built for the Atlas Obscura AI-Native Mobile & Product Engineer take-home.
 📄 [WRITEUP.md](WRITEUP.md) — the product reasoning behind what's here.
 🏗 [docs/architecture.md](docs/architecture.md) — how the AI generator works under the hood.
 
+| Discover | Generate | A run, generated end-to-end |
+|---|---|---|
+| ![Discover feed](docs/screenshots/discover.png) | ![Generate inputs](docs/screenshots/generate.png) | ![Generated run detail](docs/screenshots/detail-generated.png) |
+| The curated atlas. Real photos, AO-style cards. | Drop a pin, pick a distance and a vibe. | A real walking loop through real POIs, with Claude's writeup. |
+
 ## What it is
 
 Two-feature SwiftUI prototype:

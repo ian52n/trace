@@ -1,44 +1,47 @@
 // Generates a 1024x1024 app icon for Trace.
 // Run: swift tools/generate_app_icon.swift
 // Writes: Trace/Assets.xcassets/AppIcon.appiconset/Icon-1024.png
+//
+// iOS app icons must NOT have an alpha channel — App Store Connect rejects
+// or hides icons with transparency. We render to a CGContext with
+// `noneSkipLast` (32-bit storage, alpha channel ignored) and the resulting
+// PNG is encoded without an alpha channel.
 
 import AppKit
-import CoreText
+import CoreGraphics
+import ImageIO
+import UniformTypeIdentifiers
 
 let size = CGSize(width: 1024, height: 1024)
-
 let parchment = NSColor(srgbRed: 0.96, green: 0.94, blue: 0.89, alpha: 1.0)
 let ink       = NSColor(srgbRed: 0.13, green: 0.11, blue: 0.10, alpha: 1.0)
 let accent    = NSColor(srgbRed: 0.61, green: 0.26, blue: 0.13, alpha: 1.0)
 
-guard let bitmap = NSBitmapImageRep(
-    bitmapDataPlanes: nil,
-    pixelsWide: Int(size.width),
-    pixelsHigh: Int(size.height),
-    bitsPerSample: 8,
-    samplesPerPixel: 4,
-    hasAlpha: true,
-    isPlanar: false,
-    colorSpaceName: .deviceRGB,
-    bytesPerRow: 0,
-    bitsPerPixel: 32
-) else {
-    FileHandle.standardError.write("Failed to allocate bitmap\n".data(using: .utf8)!)
-    exit(1)
-}
+let colorSpace = CGColorSpace(name: CGColorSpace.sRGB)!
+let bitmapInfo = CGImageAlphaInfo.noneSkipLast.rawValue | CGBitmapInfo.byteOrder32Little.rawValue
 
-NSGraphicsContext.saveGraphicsState()
-guard let ctx = NSGraphicsContext(bitmapImageRep: bitmap) else {
-    FileHandle.standardError.write("Failed to create graphics context\n".data(using: .utf8)!)
+guard let ctx = CGContext(
+    data: nil,
+    width: Int(size.width),
+    height: Int(size.height),
+    bitsPerComponent: 8,
+    bytesPerRow: 0,
+    space: colorSpace,
+    bitmapInfo: bitmapInfo
+) else {
+    FileHandle.standardError.write("Failed to create CGContext\n".data(using: .utf8)!)
     exit(1)
 }
-NSGraphicsContext.current = ctx
 
 // Background
-parchment.setFill()
-NSRect(origin: .zero, size: size).fill()
+ctx.setFillColor(parchment.cgColor)
+ctx.fill(CGRect(origin: .zero, size: size))
 
-// "T" — use New York serif if available, fall back to Georgia.
+// Text via NSGraphicsContext sitting on top of our CGContext
+let nsCtx = NSGraphicsContext(cgContext: ctx, flipped: false)
+NSGraphicsContext.saveGraphicsState()
+NSGraphicsContext.current = nsCtx
+
 let fontSize: CGFloat = 680
 let font = NSFont(name: "NewYork-Semibold", size: fontSize)
     ?? NSFont(name: "NewYorkExtraLarge-Semibold", size: fontSize)
@@ -60,28 +63,38 @@ let strOrigin = NSPoint(
 )
 str.draw(at: strOrigin)
 
-// Thin horizontal rule below the T, in accent color
-accent.setStroke()
-let rule = NSBezierPath()
-rule.lineWidth = 10
-let ruleY: CGFloat = 220
-rule.move(to: NSPoint(x: 340, y: ruleY))
-rule.line(to: NSPoint(x: size.width - 340, y: ruleY))
-rule.stroke()
-
 NSGraphicsContext.restoreGraphicsState()
 
-guard let data = bitmap.representation(using: NSBitmapImageRep.FileType.png, properties: [:]) else {
-    FileHandle.standardError.write("Failed to encode PNG\n".data(using: .utf8)!)
+// Accent horizontal rule below the T
+ctx.setStrokeColor(accent.cgColor)
+ctx.setLineWidth(10)
+ctx.move(to: CGPoint(x: 340, y: 220))
+ctx.addLine(to: CGPoint(x: size.width - 340, y: 220))
+ctx.strokePath()
+
+guard let cgImage = ctx.makeImage() else {
+    FileHandle.standardError.write("Failed to make CGImage\n".data(using: .utf8)!)
     exit(1)
 }
 
 let outPath = "Trace/Assets.xcassets/AppIcon.appiconset/Icon-1024.png"
 let outURL = URL(fileURLWithPath: outPath)
-do {
-    try data.write(to: outURL)
-    print("Wrote \(outPath) (\(data.count) bytes, font: \(font.fontName))")
-} catch {
-    FileHandle.standardError.write("Write failed: \(error)\n".data(using: .utf8)!)
+
+guard let dest = CGImageDestinationCreateWithURL(
+    outURL as CFURL,
+    UTType.png.identifier as CFString,
+    1, nil
+) else {
+    FileHandle.standardError.write("Failed to create image destination\n".data(using: .utf8)!)
+    exit(1)
+}
+// Force PNG encoder to drop the alpha channel.
+let props: [CFString: Any] = [kCGImagePropertyHasAlpha: false]
+CGImageDestinationAddImage(dest, cgImage, props as CFDictionary)
+
+if CGImageDestinationFinalize(dest) {
+    print("Wrote \(outPath) (font: \(font.fontName))")
+} else {
+    FileHandle.standardError.write("Failed to finalize PNG\n".data(using: .utf8)!)
     exit(1)
 }

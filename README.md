@@ -85,7 +85,7 @@ Suggested order, fastest to depth:
     └── package.json
 ```
 
-## What's intentionally not here
+## What's not here yet
 
 No accounts, no Strava import, no social, no onboarding, no settings, no live GPS recording, no app icon, no real hero photos (gradient placeholders), no automated tests.
 

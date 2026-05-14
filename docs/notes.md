@@ -25,6 +25,7 @@ I also kept the prototype honest about what it doesn't actually know. Generated 
 
 ## What's next
 
+- Update curated runs daily. They should be personalized.
 - POI types factored into the prompt — sending Claude not just names but categories ("historic site", "park", "viewpoint") so it can write more confidently about what each is.
 - A "saved for trip" mode that groups runs by upcoming travel destination and offers them on the days you'll be there.
 - A small lock-screen widget that surfaces the next run on your trip.

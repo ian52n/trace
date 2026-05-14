@@ -5,6 +5,7 @@ import CoreLocation
 /// Builds a loop of waypoints through ordered POIs, snapping the polyline
 /// between each pair to a real walking route via MKDirections.
 /// Falls back to a straight segment if MKDirections has no route for a leg.
+/// This can lead to impossible routes and should be fixed in a later version.
 enum RouteBuilder {
     static func buildLoop(through pois: [POI]) async -> [Waypoint] {
         guard pois.count >= 2 else {

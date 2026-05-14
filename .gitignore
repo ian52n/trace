@@ -1,0 +1,29 @@
+# Xcode
+build/
+DerivedData/
+*.xcodeproj/
+!project.yml
+*.xcuserstate
+xcuserdata/
+*.xcworkspace/
+
+# Swift Package Manager
+.swiftpm/
+Package.resolved
+
+# Node (worker/)
+node_modules/
+
+# Cloudflare Workers
+.wrangler/
+
+# Claude Code local settings
+.claude/
+
+# macOS
+.DS_Store
+
+# Secrets
+.env
+.env.local
+Secrets.swift

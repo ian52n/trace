@@ -1,0 +1,12 @@
+name = "trace-ai"
+main = "src/index.ts"
+compatibility_date = "2026-05-01"
+
+# After cloning, run:
+#   npm install
+#   npx wrangler login
+#   npx wrangler secret put ANTHROPIC_API_KEY   # paste your key
+#   npx wrangler deploy
+#
+# wrangler will print a URL like https://trace-ai.<your-subdomain>.workers.dev
+# Put that URL into Trace/Config.swift.

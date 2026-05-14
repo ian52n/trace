@@ -22,7 +22,7 @@
       { "lat": 38.7077, "lng": -9.1430, "label": "Finish", "note": "Cais do Sodré" }
     ],
     "postRunMove": "Pastel de nata + bica at Manteigaria. Eat the first one standing at the bar. Order a second.",
-    "heroImageURL": null,
+    "heroImageURL": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Aqueduto_das_%C3%81guas_Livres2.JPG/1280px-Aqueduto_das_%C3%81guas_Livres2.JPG",
     "isAIGenerated": false,
     "createdAt": "2026-05-01T07:00:00Z"
   },
@@ -47,8 +47,8 @@
       { "lat": 35.7197, "lng": 139.7702, "label": "3", "note": "Tennō-ji Temple" },
       { "lat": 35.7170, "lng": 139.7754, "label": "Finish", "note": "Ueno Park" }
     ],
-    "postRunMove": "Kayaba Coffee, opened 1938, still serving an egg sandwich that has not been reinvented since.",
-    "heroImageURL": null,
+    "postRunMove": "Kayaba Coffee — opened 1938, briefly closed when the proprietor died in 2006, reopened in 2009 by neighbors who weren't going to let that be that. The egg sandwich is intact.",
+    "heroImageURL": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Tokyo_-_Yanaka_143.jpg/1280px-Tokyo_-_Yanaka_143.jpg",
     "isAIGenerated": false,
     "createdAt": "2026-05-01T07:00:00Z"
   },
@@ -74,8 +74,8 @@
       { "lat": 55.9485, "lng": -3.1672, "label": null, "note": null },
       { "lat": 55.9527, "lng": -3.1730, "label": "Finish", "note": "Back to Holyrood" }
     ],
-    "postRunMove": "Walk five minutes to The Sheep Heid Inn, Scotland's oldest pub. They've been open since 1360. They are not impressed by your run.",
-    "heroImageURL": null,
+    "postRunMove": "Walk five minutes to The Sheep Heid Inn, which reputedly has stood on its spot since 1360. The current building is younger, the claim is older, the pints are good. They are not impressed by your run.",
+    "heroImageURL": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Edinburgh_Arthur_Seat_dsc06165.jpg/1280px-Edinburgh_Arthur_Seat_dsc06165.jpg",
     "isAIGenerated": false,
     "createdAt": "2026-05-01T07:00:00Z"
   },
@@ -102,7 +102,7 @@
       { "lat": 64.1502, "lng": -21.9326, "label": "Finish", "note": "Back at Harpa" }
     ],
     "postRunMove": "Don't shower. Walk straight into the pool. Then a hot dog at Bæjarins Beztu — the one Bill Clinton ate at, which the locals are tired of hearing about and also still kind of proud of.",
-    "heroImageURL": null,
+    "heroImageURL": "https://upload.wikimedia.org/wikipedia/en/thumb/7/71/Sun_Voyager.jpeg/1280px-Sun_Voyager.jpeg",
     "isAIGenerated": false,
     "createdAt": "2026-05-01T07:00:00Z"
   },
@@ -129,7 +129,7 @@
       { "lat": 40.7000, "lng": -73.9959, "label": "Finish", "note": "Back to the park" }
     ],
     "postRunMove": "Almondine Bakery, DUMBO. Get the almond croissant. Eat it on the pier, looking at where you just were.",
-    "heroImageURL": null,
+    "heroImageURL": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Brooklyn_Bridge_Manhattan.jpg/1280px-Brooklyn_Bridge_Manhattan.jpg",
     "isAIGenerated": false,
     "createdAt": "2026-05-01T07:00:00Z"
   }

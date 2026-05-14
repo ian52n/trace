@@ -1,11 +1,12 @@
 # Xcode
 build/
 DerivedData/
-*.xcodeproj/
-!project.yml
 *.xcuserstate
 xcuserdata/
-*.xcworkspace/
+
+# The .xcodeproj is committed for one-command setup. It's generated from
+# project.yml via xcodegen — see README. Per-user state inside the project
+# is still ignored via the entries above.
 
 # Swift Package Manager
 .swiftpm/

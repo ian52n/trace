@@ -22,23 +22,28 @@ Two-feature SwiftUI prototype:
 
 ## Quick run
 
-In the simulator (zero setup beyond cloning):
+In the simulator — one command after cloning:
+
+```sh
+open Trace.xcodeproj
+```
+
+Then ⌘R in Xcode against any iOS 17+ simulator (built with Xcode 26.5; iPhone 17 Pro Max is what the screenshots above are from). The Cloudflare Worker is already deployed at the URL baked into [`Trace/Config.swift`](Trace/Config.swift), so the Generate tab calls Claude out of the box — no keys, no env vars, no Worker redeploy.
+
+### On a physical device
+
+The committed project is signed against my Apple Developer team (`LT3456KW44`). To run on your own device, open the project in Xcode and change the team under **Trace → Signing & Capabilities → Team** to your own. iOS 17+.
+
+### Regenerating the project from source
+
+The `.xcodeproj` is committed for one-command setup, but it's actually generated from [`project.yml`](project.yml) via [xcodegen](https://github.com/yonaskolb/XcodeGen):
 
 ```sh
 brew install xcodegen
 xcodegen generate
-open Trace.xcodeproj
 ```
 
-Then ⌘R in Xcode. The Cloudflare Worker is already deployed at the URL baked into `Trace/Config.swift`, so the Generate tab calls Claude out of the box — no keys, no env vars, no Worker redeploy.
-
-### On a physical device
-
-The project is signed against my Apple Developer team (`LT3456KW44`). To run on your own device:
-
-1. Edit `DEVELOPMENT_TEAM` in [project.yml](project.yml) to your team ID.
-2. Re-run `xcodegen generate`.
-3. Build and run from Xcode against your connected iPhone (iOS 17+).
+Run this if you change `project.yml` (e.g. swapping the development team).
 
 ## Where to read
 

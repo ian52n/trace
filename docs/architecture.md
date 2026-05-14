@@ -43,7 +43,7 @@ User drops pin + picks distance + vibe
                   ▼
 ┌──────────────────────────────────────────┐
 │  Cloudflare Worker (POST /)              │
-│  Body: pois + measured distance + vibe   │
+│  Body: POIs + measured distance + vibe   │
 └──────────────────────────────────────────┘
                   │
                   ▼
@@ -86,8 +86,6 @@ Each tier's queries run in parallel via `withTaskGroup`. The escalation threshol
 | 16 km    | 6        |
 | 21 km    | 8        |
 
-Formula: `min(max(3, round(distanceKm / 2.5)), 8)`.
-
 **Polygon fallback.** If even tier 4 can't produce 3 unique POIs, the route degenerates to a synthetic circle around the pin and the Claude prompt is told there are no named places to reference — so the story can't fabricate landmarks the user won't actually pass.
 
 ---
@@ -96,7 +94,7 @@ Formula: `min(max(3, round(distanceKm / 2.5)), 8)`.
 
 [`POIService.selectSpreadByAngle`](../Trace/Data/POIService.swift)
 
-After the tiered search there are typically 6-30 candidate POIs. Picking the closest N produces a clustered loop near the pin (this was the first bug to fix). Instead:
+After the tiered search there are typically 6-30 candidate POIs. Naiely picking the closest N produced a clustered loop near the pin (this was the first bug to fix). Instead:
 
 1. Compute the target straight-line radius for the requested loop:
    ```
@@ -133,7 +131,7 @@ For each consecutive POI pair (and the closing leg back to POI 1):
 3. Append them to the waypoint list. The first and last (which are the POI coordinates) get the POI name and a numeric label; intermediate points are unlabelled and only contribute to the polyline geometry.
 
 Failure modes:
-- If `MKDirections` finds no walking route for a leg (two POIs across water with no pedestrian path), that segment falls back to a straight line. The rest of the loop is still real walking geometry.
+- If `MKDirections` finds no walking route for a leg (two POIs across water with no pedestrian path), that segment falls back to a straight line. The rest of the loop is still real walking geometry. This isn't an ideal solution.
 - Apple rate-limits `MKDirections` but generously enough that 6-8 sequential calls per generation is well within budget.
 
 ---
@@ -148,7 +146,7 @@ After the first walking route is built, the actual polyline distance is measured
 - **> 150% of target**: target radius / 1.4, desired count − 1, re-run stages 2-4.
 - **Otherwise**: keep the first attempt.
 
-Exactly one refinement pass. Costs ~3-4 extra seconds of `MKDirections` calls but is well under the Claude latency. The route the user sees is whichever pass landed closer to the requested distance.
+Exactly one refinement pass. `MKDirections` calls add latency, but this is negligible compared to Claude latency. The route the user sees is whichever pass landed closer to the requested distance.
 
 ---
 
@@ -220,8 +218,8 @@ If `aiWorkerURL` is nil, the app falls back to `MockAIService` with hand-written
 ```swift
 struct Run {
     let distanceKm: Double         // always real (polyline-derived for generated runs)
-    let elevationGainM: Int?       // nil for generated runs — we don't have elevation data
-    let surface: Surface?          // nil for generated runs — we don't know
+    let elevationGainM: Int?       // nil for generated runs — later versions should include elevation info
+    let surface: Surface?          // nil for generated runs — later versions should include surface info
     // ...
 }
 ```

@@ -28,7 +28,7 @@ In the simulator — one command after cloning:
 open Trace.xcodeproj
 ```
 
-Then ⌘R in Xcode against any iOS 17+ simulator (built with Xcode 26.5; iPhone 17 Pro Max is what the screenshots above are from). The Cloudflare Worker is already deployed at the URL baked into [`Trace/Config.swift`](Trace/Config.swift), so the Generate tab calls Claude out of the box — no keys, no env vars, no Worker redeploy.
+Then ⌘R in Xcode against any iOS 17+ simulator (built with Xcode 26.5; screenshots from iPHone 17 Pro Max). The Cloudflare Worker is already deployed at the URL baked into [`Trace/Config.swift`](Trace/Config.swift), so the Generate tab calls Claude out of the box — no keys, no env vars, no Worker redeploy.
 
 ### On a physical device
 
@@ -87,6 +87,6 @@ Suggested order, fastest to depth:
 
 ## What's intentionally not here
 
-No accounts, no Strava import, no social, no onboarding, no settings, no live GPS recording, no automated tests.
+No accounts, no Strava import, no social, no onboarding, no settings, no live GPS recording, no app icon, no real hero photos (gradient placeholders), no automated tests.
 
 The brief was "make one slice feel great." This slice is _runs as destinations + AI-authored runs grounded in real geography_. Everything else got cut to spend the time on the editorial bar of the curated content and the AI generation pipeline.

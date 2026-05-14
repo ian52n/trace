@@ -20,11 +20,10 @@ I also kept the prototype honest about what it doesn't actually know. Generated 
 
 ## What's still rough
 
-- **No error / empty state on generation failure.** If Claude or the Worker times out, the loading overlay just disappears silently. Easy fix; deferred for time.
+- **No error / empty state on generation failure.** If Claude or the Worker times out, the loading overlay just disappears silently.
 - **POI selection on lopsided distributions.** When POIs are clustered to one side of the pin (coastline, city edge), the angular-spread selector has a relaxed-separation fallback, but in extreme cases the loop still ends up shorter than requested.
-- **The 5 curated runs were verified to be open and reasonable**, and two claims that I'd originally overstated (Kayaba Coffee's continuity through its 2006-2009 closure, Sheep Heid Inn's "since 1360" reputation) were softened. There may still be small editorial misses I haven't caught.
 
-## If I had another day
+## What's next
 
 - POI types factored into the prompt — sending Claude not just names but categories ("historic site", "park", "viewpoint") so it can write more confidently about what each is.
 - A "saved for trip" mode that groups runs by upcoming travel destination and offers them on the days you'll be there.
@@ -33,9 +32,3 @@ I also kept the prototype honest about what it doesn't actually know. Generated 
 - A "regenerate" button on AI-generated detail screens.
 - Real photos for the curated runs sourced from a proper licensed library (the current set are Wikimedia Commons CC-licensed — fine, but a content-led brand would curate these themselves).
 - Automated tests for the geometry and selection algorithms — exactly the kind of code that benefits from them.
-
-## Process note
-
-This prototype was built collaboratively with Claude as my pair-programmer, which feels like the right meta-disclosure for a role titled "AI-Native." I drove the product calls (the slice, the gap thesis, the editorial direction, every UI decision) and reviewed every line of code that landed; Claude wrote most of the SwiftUI scaffolding under my direction. The Cloudflare Worker pattern, the wedge-selection geometry, and the progress-callback API for the AI service all came out of working through tradeoffs in chat. The curated content was Claude-drafted in my voice and edited.
-
-The AI generator at the heart of the app calls Claude too — that part isn't meta; that's the product.

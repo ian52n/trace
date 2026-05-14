@@ -87,6 +87,6 @@ Suggested order, fastest to depth:
 
 ## What's intentionally not here
 
-No accounts, no Strava import, no social, no onboarding, no settings, no live GPS recording, no app icon, no real hero photos (gradient placeholders), no automated tests.
+No accounts, no Strava import, no social, no onboarding, no settings, no live GPS recording, no automated tests.
 
 The brief was "make one slice feel great." This slice is _runs as destinations + AI-authored runs grounded in real geography_. Everything else got cut to spend the time on the editorial bar of the curated content and the AI generation pipeline.

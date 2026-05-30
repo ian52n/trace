@@ -1,3 +1,12 @@
+/**
+ * Detail — one run, read like an Atlas Obscura entry.
+ *
+ * Full-bleed hero (with floating back / save buttons over it), then the
+ * editorial body: title + location, a facts row, the story, the route map, a
+ * numbered "what you'll pass" list, and the post-run move. Shared by both the
+ * Discover and Generate stacks. Fields that are null for AI-generated runs
+ * (elevation, surface) are simply omitted rather than faked.
+ */
 import React from 'react';
 import {
   Pressable,
@@ -26,6 +35,8 @@ export function DetailScreen({ route, navigation }: DetailProps) {
   const insets = useSafeAreaInsets();
   const saved = store.isSaved(run);
 
+  // Only named/labelled waypoints feed the "what you'll pass" list and the map
+  // pins; the rest are unlabelled polyline points that just draw the line.
   const labeled = run.waypoints.filter(
     (w) => w.label != null || w.note != null
   );

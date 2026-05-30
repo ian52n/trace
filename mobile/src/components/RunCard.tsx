@@ -8,6 +8,11 @@ import { colors, fonts } from '../theme/theme';
 import { HeroBanner } from './HeroBanner';
 import { GeneratedChip } from './VibePill';
 
+/**
+ * Feed card for a single run: hero banner on top, then location eyebrow (with a
+ * "generated" chip for AI runs), title, hook, and a compact stats row. The
+ * stats omit elevation/surface when null (true for generated runs).
+ */
 export function RunCard({ run }: { run: Run }) {
   return (
     <View style={styles.card}>

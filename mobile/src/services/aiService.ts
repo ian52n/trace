@@ -1,3 +1,13 @@
+/**
+ * The Generate tab's data layer.
+ *
+ * Defines the `AIService` contract and two implementations behind a factory:
+ * `ClaudeAIService` (POSTs the pin/distance/vibe to the Worker, which runs the
+ * server-side geo + Claude pipeline and returns a finished run) and
+ * `MockAIService` (hand-written templates + a geometric loop, so the app runs
+ * offline). Both report staged progress for the loading overlay, and the client
+ * falls back to a geometric `circularLoop` whenever the Worker returns no route.
+ */
 import { AI_WORKER_URL } from '../config';
 import {
   polylineDistanceKm,

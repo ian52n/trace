@@ -1,3 +1,11 @@
+/**
+ * The run store — the app's single source of truth, exposed via context.
+ *
+ * Curated runs are bundled (read-only). Saved run ids and AI-generated runs are
+ * the only mutable state and persist to `AsyncStorage` (the React Native analog
+ * of the SwiftUI app's `@Observable RunStore` + Documents JSON). It's a plain
+ * context + hooks store — no Redux/MobX; the surface is tiny.
+ */
 import React, {
   createContext,
   useContext,
@@ -111,6 +119,7 @@ export function RunStoreProvider({ children }: { children: ReactNode }) {
   );
 }
 
+/** Access the run store. Throws if used outside `RunStoreProvider`. */
 export function useRunStore(): RunStore {
   const store = useContext(RunStoreContext);
   if (!store) {

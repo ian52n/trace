@@ -1,3 +1,12 @@
+/**
+ * Generate — build a run from a pin, a distance, and a vibe.
+ *
+ * The map's center is the "pin": a fixed crosshair sits over the middle and the
+ * pin coordinate tracks the map region as the user pans (a ref, not state, so
+ * panning doesn't re-render). "Locate me" recenters on the device location.
+ * Tapping Generate calls the AI service (real Worker or offline mock), shows a
+ * staged overlay, stores the result, and pushes Detail.
+ */
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
@@ -33,6 +42,7 @@ const DEFAULT_REGION: Region = {
 const DISTANCE_OPTIONS = [5, 8, 12, 16, 21];
 const VIBE_OPTIONS: Vibe[] = ['historic', 'nature', 'weird', 'coffee'];
 
+// Created once at module load (reads config to pick the real or mock service).
 const service = makeAIService();
 
 export function GenerateScreen({ navigation }: GenerateHomeProps) {
@@ -199,6 +209,11 @@ export function GenerateScreen({ navigation }: GenerateHomeProps) {
   );
 }
 
+/**
+ * Full-screen overlay shown while a run is generating: a pulsing vibe glyph and
+ * a message that tracks the pipeline stage (searching → routing → writing), so
+ * the wait reflects what's actually happening rather than a blank spinner.
+ */
 function GeneratingOverlay({
   vibe,
   stage,

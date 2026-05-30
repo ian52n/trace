@@ -1,3 +1,12 @@
+/**
+ * App root.
+ *
+ * Loads the Lora serif (holding the splash until it's ready), then mounts the
+ * provider stack — safe-area insets, the run store, and navigation — around a
+ * two-tab layout (Discover, Generate). Each tab owns its own native stack so the
+ * shared Detail screen pushes *within* the active tab and the tab bar stays
+ * visible, mirroring the SwiftUI app's `NavigationStack`-per-tab structure.
+ */
 import React from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
@@ -22,6 +31,9 @@ import type {
   GenerateStackParamList,
 } from './src/navigation/types';
 
+// Each tab is a native stack whose root is the tab's home screen and which can
+// push the shared Detail screen. Headers are hidden everywhere — screens draw
+// their own (the full-bleed hero on Detail, the editorial header on the feeds).
 const DiscoverStack = createNativeStackNavigator<DiscoverStackParamList>();
 const GenerateStack = createNativeStackNavigator<GenerateStackParamList>();
 const Tab = createBottomTabNavigator();

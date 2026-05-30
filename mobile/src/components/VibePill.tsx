@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { vibeIcon, vibeLabel, type Vibe } from '../models/run';
 import { colors } from '../theme/theme';
 
+/** Icon + label pill for a vibe, shown translucent over the hero image. */
 export function VibePill({ vibe }: { vibe: Vibe }) {
   return (
     <View style={styles.pill}>
@@ -13,6 +14,7 @@ export function VibePill({ vibe }: { vibe: Vibe }) {
   );
 }
 
+/** "Generated" badge marking an AI-authored run on cards and the detail header. */
 export function GeneratedChip() {
   return (
     <View style={styles.generated}>

@@ -1,3 +1,11 @@
+/**
+ * Discover — the curated atlas feed.
+ *
+ * A `FlatList` of run cards (newest generated runs first, then the curated
+ * atlas) with an editorial header and an All / Saved filter. Tapping a card
+ * pushes the Detail screen. Generated and saved runs come from the store; the
+ * curated set is bundled.
+ */
 import React, { useState } from 'react';
 import {
   FlatList,
@@ -19,6 +27,7 @@ export function DiscoverScreen({ navigation }: DiscoverHomeProps) {
   const insets = useSafeAreaInsets();
   const [showSavedOnly, setShowSavedOnly] = useState(false);
 
+  // `insets.top` because the feed runs under the status bar (no nav header).
   const runs = showSavedOnly ? store.savedRuns : store.allRuns;
 
   return (

@@ -1,3 +1,10 @@
+/**
+ * The domain model.
+ *
+ * One `Run` type backs both curated entries (bundled JSON) and AI-generated
+ * runs (from the Worker), plus small pure helpers for display and geometry.
+ * Mirrors the SwiftUI app's `Run` struct so the two front-ends stay in step.
+ */
 import type { ComponentProps } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -17,6 +24,11 @@ export type Vibe =
 
 export type BestTime = 'dawn' | 'morning' | 'midday' | 'evening' | 'anytime';
 
+/**
+ * One point on a route. A `label`/`note` marks a real named stop (drawn as a
+ * numbered pin and listed under "what you'll pass"); unlabelled points are just
+ * polyline geometry that draws the line.
+ */
 export interface Waypoint {
   lat: number;
   lng: number;
@@ -24,6 +36,12 @@ export interface Waypoint {
   note: string | null;
 }
 
+/**
+ * A run, treated as a destination. `elevationGainM` and `surface` are null for
+ * AI-generated runs (no data source yet) and the UI omits them rather than
+ * faking numbers; `distanceKm` is always real (polyline-derived for generated
+ * runs). `createdAt` is an ISO 8601 string so it sorts and persists as-is.
+ */
 export interface Run {
   id: string;
   title: string;
@@ -57,6 +75,8 @@ export function vibeLabel(vibe: Vibe): string {
   return vibe.charAt(0).toUpperCase() + vibe.slice(1);
 }
 
+/** Ionicon name for a vibe — the cross-platform stand-in for the SF Symbols
+ *  the SwiftUI app used. */
 export function vibeIcon(vibe: Vibe): IoniconName {
   switch (vibe) {
     case 'historic':

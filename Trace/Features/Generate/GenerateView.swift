@@ -223,7 +223,7 @@ private struct GeneratingOverlay: View {
     private var message: String {
         switch stage {
         case .searching: "Looking for things worth running past…"
-        case .routing:   "Threading the walking route…"
+        case .routing:   "Tracing your route…"
         case .writing:   "Asking Claude to write it up…"
         }
     }

@@ -5,8 +5,13 @@ compatibility_date = "2026-05-01"
 # After cloning, run:
 #   npm install
 #   npx wrangler login
-#   npx wrangler secret put ANTHROPIC_API_KEY   # paste your key
+#   npx wrangler secret put ANTHROPIC_API_KEY      # paste your Anthropic key
+#   npx wrangler secret put GOOGLE_MAPS_API_KEY    # server key: Places + Directions + Geocoding APIs
 #   npx wrangler deploy
 #
 # wrangler will print a URL like https://trace-ai.<your-subdomain>.workers.dev
-# Put that URL into Trace/Config.swift.
+# Put that URL into mobile/src/config.ts (RN app) and/or Trace/Config.swift (iOS).
+#
+# GOOGLE_MAPS_API_KEY is only needed for the cross-platform path (server-side POI
+# search + walking routes). The legacy native-iOS path supplies its own POIs and
+# needs only ANTHROPIC_API_KEY.

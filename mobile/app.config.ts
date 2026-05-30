@@ -49,6 +49,9 @@ const config: ExpoConfig = {
           'Trace uses your location to suggest runs near you.',
       },
     ],
+    // Sets the iOS development team + automatic signing at prebuild time so
+    // physical-device builds are repeatable without hand-editing the pbxproj.
+    './plugins/withIosSigning',
   ],
 };
 

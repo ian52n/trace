@@ -28,3 +28,7 @@ node_modules/
 .env
 .env.local
 Secrets.swift
+
+# Demo source media — kept local only; the optimized GIF lives in docs/demo.gif
+/demo.gif
+/demo.webm

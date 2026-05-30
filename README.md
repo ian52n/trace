@@ -10,6 +10,12 @@ This branch is the **cross-platform React Native rebuild** — one codebase runn
 🏗 [docs/architecture.md](docs/architecture.md) — how the AI generator works under the hood.
 🔁 [docs/rebuild.md](docs/rebuild.md) — what changed porting SwiftUI → React Native, and why.
 
+<p align="center">
+  <img src="docs/demo.gif" width="280" alt="Trace on Android: the curated feed, a run detail, and generating a run from a pin" />
+  <br/>
+  <em>Running on Android — the curated feed, a run detail, then generating a run from a pin.</em>
+</p>
+
 | Discover | Generate | A run, generated end-to-end |
 |---|---|---|
 | ![Discover feed](docs/screenshots/discover.png) | ![Generate inputs](docs/screenshots/generate.png) | ![Generated run detail](docs/screenshots/detail-generated.png) |

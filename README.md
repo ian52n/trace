@@ -4,8 +4,11 @@ A travel app for passionate runners. **Runs as destinations** — not routes ove
 
 Built for the Atlas Obscura AI-Native Mobile & Product Engineer take-home.
 
+This branch is the **cross-platform React Native rebuild** — one codebase running natively on **iOS and Android** — rebuilt from the original SwiftUI prototype (still included, see [The SwiftUI original](#the-swiftui-original)).
+
 📄 [WRITEUP.md](WRITEUP.md) — the product reasoning behind what's here.
 🏗 [docs/architecture.md](docs/architecture.md) — how the AI generator works under the hood.
+🔁 [docs/rebuild.md](docs/rebuild.md) — what changed porting SwiftUI → React Native, and why.
 
 | Discover | Generate | A run, generated end-to-end |
 |---|---|---|
@@ -14,51 +17,42 @@ Built for the Atlas Obscura AI-Native Mobile & Product Engineer take-home.
 
 ## What it is
 
-Two-feature SwiftUI prototype:
+Two features, same on both platforms:
 
-1. **Discover** — a curated, story-driven feed of iconic and hidden runs around the world. Each entry is hand-written in Atlas Obscura voice: a hook, a story, what you'll pass, a post-run move.
+1. **Discover** — a curated, story-driven feed of iconic and hidden runs around the world. Each entry is hand-written in Atlas Obscura voice: a hook, a story, what you'll pass, a post-run move. Photos ship in the app.
 
-2. **Generate** — drop a pin, pick a distance and a vibe, and the app builds a real walking-route loop, then writes an Atlas Obscura-style entry for it. The route uses `MKLocalSearch` to find real nearby POIs, `MKDirections` to thread walking paths between them, and **Claude Opus 4.7** (via a server-side Cloudflare Worker proxy) to write the story anchored to the actual measured route.
+2. **Generate** — drop a pin, pick a distance and a vibe, and the app builds a real walking-route loop, then writes an Atlas Obscura-style entry for it. POI discovery, walking-route stitching, and the writeup all happen **server-side** in a Cloudflare Worker (Google Places + Directions + Geocoding, then **Claude**), so iOS and Android produce identical results.
 
-## Quick run
+## How it's built
 
-In the simulator — one command after cloning:
+- **App** — React Native via **Expo (SDK 56)**, TypeScript, React Navigation, `react-native-maps` (Apple Maps on iOS, Google Maps on Android), Lora serif. One codebase, two platforms.
+- **Backend** — a **Cloudflare Worker** ([`worker/`](worker/)) that owns the whole generation pipeline and holds the API keys as server-side secrets. Nothing sensitive ships in the app.
+- **State** — local only: curated runs are bundled JSON; saved + generated runs persist via `AsyncStorage`. No accounts, no server state.
 
-```sh
-open Trace.xcodeproj
-```
-
-Then ⌘R in Xcode against any iOS 17+ simulator (built with Xcode 26.5; screenshots from iPHone 17 Pro Max). The Cloudflare Worker is already deployed at the URL baked into [`Trace/Config.swift`](Trace/Config.swift), so the Generate tab calls Claude out of the box — no keys, no env vars, no Worker redeploy.
-
-### On a physical device
-
-The committed project is signed against my Apple Developer team (`LT3456KW44`). To run on your own device, open the project in Xcode and change the team under **Trace → Signing & Capabilities → Team** to your own. iOS 17+.
-
-### Regenerating the project from source
-
-The `.xcodeproj` is committed for one-command setup, but it's actually generated from [`project.yml`](project.yml) via [xcodegen](https://github.com/yonaskolb/XcodeGen):
+## Run it
 
 ```sh
-brew install xcodegen
-xcodegen generate
+cd mobile
+npm install
+npx expo run:ios          # iOS simulator — Apple Maps, no key needed
 ```
 
-Run this if you change `project.yml` (e.g. swapping the development team).
+For Android, add a Google Maps SDK key (renders the map tiles) and run:
 
-## Where to read
+```sh
+cp .env.example .env       # paste your Maps SDK for Android key
+npx expo run:android
+```
 
-Suggested order, fastest to depth:
+`react-native-maps` is a native module, so these are **development builds**, not Expo Go. The Generate tab calls the already-deployed Worker out of the box — no keys or backend setup needed to try it.
 
-1. [Trace/Models/Run.swift](Trace/Models/Run.swift) — the domain model. One struct.
-2. [Trace/Data/curated_runs.json](Trace/Data/curated_runs.json) — the 5 hand-written runs.
-3. [Trace/Data/AIService.swift](Trace/Data/AIService.swift) — the AI contract + offline fallback (`MockAIService`).
-4. [Trace/Data/ClaudeAIService.swift](Trace/Data/ClaudeAIService.swift) — the real generator. POI search → wedge selection → walking-route stitching → Claude. This is the most interesting file.
-5. [Trace/Data/POIService.swift](Trace/Data/POIService.swift) — 4-tier MKLocalSearch with distance-scaled minimums and angular-spread selection.
-6. [Trace/Data/RouteBuilder.swift](Trace/Data/RouteBuilder.swift) — `MKDirections` walking-route stitching between POIs.
-7. [worker/src/index.ts](worker/src/index.ts) — the ~150-line Cloudflare Worker that holds the Anthropic key and prompts Claude.
-8. [Trace/Features/Detail/RunDetailView.swift](Trace/Features/Detail/RunDetailView.swift) — the detail screen.
+See [`mobile/README.md`](mobile/README.md) for physical-device builds, the signing setup, and the full layout.
 
-[docs/architecture.md](docs/architecture.md) has the pipeline diagram and the design decisions behind each stage.
+## The SwiftUI original
+
+Trace was first built as a native SwiftUI app; that version still lives in [`Trace/`](Trace/) on this branch (and is what `main` holds). The React Native app is a faithful port of its design and product. The Worker stays **backward-compatible** with the Swift app's contract, so both front-ends share one backend. See [docs/rebuild.md](docs/rebuild.md) for the port story and the key architectural change (MapKit on-device → server-side Google pipeline).
+
+To run the SwiftUI version: `open Trace.xcodeproj` and ⌘R against an iOS 17+ simulator.
 
 ## Repo layout
 
@@ -66,27 +60,41 @@ Suggested order, fastest to depth:
 .
 ├── README.md
 ├── WRITEUP.md
-├── docs/architecture.md
-├── project.yml                ← xcodegen spec; the Xcode project is generated from this
-├── Trace/                     ← iOS app
-│   ├── App/                   ← @main, root TabView
-│   ├── Models/                ← Run, Waypoint, Vibe, BestTime, Surface
-│   ├── UI/                    ← Theme.swift (typography, palette)
-│   ├── Data/                  ← Stores and services (AI, POI, RouteBuilder)
-│   ├── Features/
-│   │   ├── Discover/          ← Feed + card
-│   │   ├── Detail/            ← Run detail + route map
-│   │   └── Generate/          ← AI generation flow
-│   ├── Config.swift           ← Worker URL + service-selection factory
-│   └── Assets.xcassets/
-└── worker/                    ← Cloudflare Worker for AI generation
-    ├── src/index.ts
-    ├── wrangler.toml
-    └── package.json
+├── docs/
+│   ├── architecture.md        ← the AI generation pipeline, end to end
+│   ├── rebuild.md             ← SwiftUI → React Native port notes
+│   └── notes.md               ← design calls, cuts, what's next
+├── mobile/                    ← React Native (Expo) app — iOS + Android
+│   ├── App.tsx                ← providers, fonts, tab + stack navigation
+│   ├── app.config.ts          ← Expo config (Android Maps key, iOS signing)
+│   ├── src/
+│   │   ├── models/            ← Run, Waypoint, Vibe + helpers
+│   │   ├── theme/             ← palette, type scale, vibe gradients
+│   │   ├── data/              ← curated JSON, AsyncStorage store, hero images
+│   │   ├── services/          ← AI client + offline mock
+│   │   ├── components/        ← RunCard, HeroBanner, RouteMap, Chip, VibePill
+│   │   └── screens/           ← Discover, Detail, Generate
+│   └── plugins/               ← config plugin for iOS device signing
+├── worker/                    ← Cloudflare Worker — the generation backend
+│   └── src/                   ← index (handler), geo, google, claude
+└── Trace/                     ← original SwiftUI app (iOS)
 ```
+
+## Where to read
+
+Fastest to depth, on the React Native side:
+
+1. [mobile/src/models/run.ts](mobile/src/models/run.ts) — the domain model + display/geometry helpers.
+2. [mobile/src/data/curatedRuns.json](mobile/src/data/curatedRuns.json) — the 5 hand-written runs.
+3. [mobile/src/services/aiService.ts](mobile/src/services/aiService.ts) — the AI client contract + offline `MockAIService`.
+4. [worker/src/index.ts](worker/src/index.ts) — the generation pipeline: POI search → route → measure/adjust → Claude.
+5. [worker/src/geo.ts](worker/src/geo.ts) — POI selection (angular spread) and loop ordering.
+6. [mobile/src/screens/DetailScreen.tsx](mobile/src/screens/DetailScreen.tsx) — the editorial detail screen.
+
+[docs/architecture.md](docs/architecture.md) has the full pipeline diagram and the design decision behind each stage.
 
 ## What's not here yet
 
-No accounts, no Strava import, no social, no onboarding, no settings, no live GPS recording, no app icon, no real hero photos (gradient placeholders), no automated tests.
+No accounts, no Strava import, no social, no onboarding, no settings, no live GPS recording, no automated tests.
 
-The brief was "make one slice feel great." This slice is _runs as destinations + AI-authored runs grounded in real geography_. Everything else got cut to spend the time on the editorial bar of the curated content and the AI generation pipeline.
+The brief was "make one slice feel great." This slice is _runs as destinations + AI-authored runs grounded in real geography, on every phone._ Everything else got cut to spend the time on the editorial bar of the curated content and the generation pipeline.

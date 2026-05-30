@@ -2,226 +2,208 @@
 
 How Trace's **Generate** tab turns a pin on a map into a story-driven run.
 
+In the cross-platform build the entire pipeline runs **server-side** in the Cloudflare Worker. The app sends a pin, a distance, and a vibe; the Worker discovers real POIs, stitches a walking loop, measures it, and asks Claude to write it up — then returns a finished run. Moving this off-device is what lets iOS and Android produce identical results (see [rebuild.md](rebuild.md) for why).
+
 ## Pipeline overview
 
 ```
-User drops pin + picks distance + vibe
+App: drop pin + pick distance + vibe
+   POST { lat, lng, distanceKm, vibe }
+                  │
+                  ▼  Cloudflare Worker (worker/src/index.ts)
+┌──────────────────────────────────────────┐
+│  findPOIs            (google.ts)          │
+│  Google Places nearby search, vibe        │
+│  keywords + generic fallback              │
+│  → candidate POIs, deduped, by distance   │
+└──────────────────────────────────────────┘
+                  │
+                  ▼   ┌─ refine up to 3× ──────────────┐
+┌──────────────────────────────────────────┐           │
+│  selectSpreadByAngle (geo.ts)            │           │
+│  pick stops spread around the pin near    │           │
+│  the target radius                        │           │
+└──────────────────────────────────────────┘           │
+                  ▼                                      │
+┌──────────────────────────────────────────┐           │
+│  nearestNeighborOrder (geo.ts)           │           │
+│  order the stops into a sensible loop     │           │
+└──────────────────────────────────────────┘           │
+                  ▼                                      │
+┌──────────────────────────────────────────┐           │
+│  walkingLoop        (google.ts)          │           │
+│  Google Directions walking route through  │           │
+│  the stops → polyline + measured length   │           │
+└──────────────────────────────────────────┘           │
+                  ▼                                      │
+        measure ratio = actual / requested              │
+        0.6–1.5 → accept · too long → tighten ──────────┘
+        too short → widen · still wild → reject
                   │
                   ▼
 ┌──────────────────────────────────────────┐
-│  POIService.findPOIs                     │
-│  4-tier MKLocalSearch with fallback      │
-│  → up to 30 candidate POIs               │
+│  reverseGeocodeCity (google.ts)          │
+│  pin → "City", "Country"                  │
 └──────────────────────────────────────────┘
                   │
                   ▼
 ┌──────────────────────────────────────────┐
-│  POIService.selectSpreadByAngle          │
-│  Wedge selection at target radius        │
-│  → 3-9 POIs (scaled to requested km)     │
+│  callClaude         (claude.ts)          │
+│  AO voice + JSON schema, anchored to the  │
+│  measured length and the named stops      │
+│  → title, hook, story, postRunMove        │
 └──────────────────────────────────────────┘
                   │
-                  ▼
-┌──────────────────────────────────────────┐
-│  POIService.nearestNeighborOrder         │
-│  → POIs ordered into a sensible loop     │
-└──────────────────────────────────────────┘
+   { title, hook, story, postRunMove,
+     waypoints, distanceKm, city, country }
                   │
                   ▼
-┌──────────────────────────────────────────┐
-│  RouteBuilder.buildLoop                  │
-│  MKDirections walking routes between     │
-│  consecutive POIs                        │
-│  → Real polyline waypoints               │
-└──────────────────────────────────────────┘
-                  │
-                  ▼
-       (One refinement pass if
-        actual distance is < 70%
-        or > 150% of requested)
-                  │
-                  ▼
-┌──────────────────────────────────────────┐
-│  Cloudflare Worker (POST /)              │
-│  Body: POIs + measured distance + vibe   │
-└──────────────────────────────────────────┘
-                  │
-                  ▼
-┌──────────────────────────────────────────┐
-│  Claude Opus 4.7 via Anthropic API       │
-│  System: AO voice + JSON schema          │
-│  → title, hook, story, postRunMove       │
-└──────────────────────────────────────────┘
-                  │
-                  ▼
-           Run object → detail screen
+   App builds a Run → detail screen
 ```
 
-The whole thing is driven from `ClaudeAIService.generateRun(_:onProgress:)`. Each major stage emits a `GenerationStage` via the progress callback (`.searching → .routing → .writing`), and the loading overlay in the UI reflects what's actually happening rather than a fixed timer.
+On the app side, [`mobile/src/services/aiService.ts`](../mobile/src/services/aiService.ts) makes the request and assembles the `Run`. It surfaces staged progress (`searching → routing → writing`) so the loading overlay reflects roughly what the Worker is doing rather than a fixed timer.
 
 ---
 
 ## Stage 1: POI search
 
-[`Trace/Data/POIService.swift`](../Trace/Data/POIService.swift)
+[`worker/src/google.ts` → `findPOIs`](../worker/src/google.ts)
 
-Four tiers. Each fires only if the previous one didn't produce enough unique POIs:
+Google Places **Nearby Search**, keyed to the vibe:
 
-| Tier | Queries | Radius |
-|------|---------|--------|
-| 1 | Vibe-specific (e.g. `weird` → museum, statue, art gallery, unusual landmark) | base |
-| 2 | Vibe-themed broader vocabulary (e.g. `weird` → scenic spot, monument, tower, fountain, plaza) | base |
-| 3 | Cross-vibe — abandons vibe purity (park, trail, landmark, monument, museum, viewpoint, scenic spot, historic site, garden, church, library, lake, river, bridge, plaza, fountain) | base |
-| 4 | Vibe-agnostic generics (point of interest, school, library, church, store, restaurant, post office, park, trail, landmark) | base × 1.5 |
+| Vibe | Primary keywords |
+|------|------------------|
+| historic | historic site, monument, memorial, old church |
+| nature | park, garden, trail, waterfront |
+| weird | museum, statue, art gallery, unusual landmark |
+| coffee | cafe, coffee shop, bakery |
 
-`base = max(distanceKm × 1000 / π, 800m)`.
+Each vibe's keywords run in parallel. If the vibe-specific search is too sparse (< 4 unique places), it escalates to generic fallbacks (park, landmark, monument, viewpoint, plaza) so a thin area still yields a loop.
 
-Each tier's queries run in parallel via `withTaskGroup`. The escalation threshold scales with run length:
-
-| Distance | Min POIs |
-|----------|----------|
-| 5 km     | 3        |
-| 8 km     | 3        |
-| 12 km    | 5        |
-| 16 km    | 6        |
-| 21 km    | 8        |
-
-**Polygon fallback.** If even tier 4 can't produce 3 unique POIs, the route degenerates to a synthetic circle around the pin and the Claude prompt is told there are no named places to reference — so the story can't fabricate landmarks the user won't actually pass.
+`base radius = max(distanceKm × 1000 / π, 800 m)`. Results are deduped by name, filtered to within `base × 1.5`, and sorted by distance from the pin.
 
 ---
 
 ## Stage 2: POI selection
 
-[`POIService.selectSpreadByAngle`](../Trace/Data/POIService.swift)
+[`worker/src/geo.ts` → `selectSpreadByAngle`](../worker/src/geo.ts)
 
-After the tiered search there are typically 6-30 candidate POIs. Naiely picking the closest N produced a clustered loop near the pin (this was the first bug to fix). Instead:
+Naïvely picking the closest N produces a loop clustered next to the pin. Instead:
 
-1. Compute the target straight-line radius for the requested loop:
+1. Target straight-line radius for the requested loop:
    ```
-   targetRadiusKm = (distanceKm / (2π)) / 1.3
+   targetRadiusKm = (distanceKm / 2π) / 1.3
    ```
-   The 1.3 deflates for the typical ratio of walking-route length to straight-line tour length. For a 16 km loop the target radius is ~1.96 km.
+   The 1.3 deflates for the typical ratio of walking-route length to straight-line tour length.
+2. Score each candidate by `|distanceFromPin − targetRadius|` (lower = better fit).
+3. Greedily select stops at least `(360 / desiredCount) × 0.6` degrees apart in bearing — forcing angular spread instead of clustering.
+4. If strict spreading is too sparse (lopsided distribution — coastline, city edge), relax the separation by half and top up.
 
-2. Score every candidate by `|actualDistance − targetRadius|` (lower = closer to ideal).
-
-3. Sort by score; greedily select POIs that are at least `(360 / desiredCount) × 0.6` degrees apart in bearing from the pin. This forces angular spread instead of clustering.
-
-4. If strict spreading misses too many (lopsided POI distribution — coastline, city edge), relax the angular separation by half and top up.
-
-Desired POI count is `minimumPOIs + 1`.
+Desired count scales with distance via `minimumPOIs` (3 stops for short runs, up to 8 for long ones), plus one.
 
 ---
 
 ## Stage 3: Loop ordering
 
-[`POIService.nearestNeighborOrder`](../Trace/Data/POIService.swift)
+[`worker/src/geo.ts` → `nearestNeighborOrder`](../worker/src/geo.ts)
 
-A nearest-neighbor TSP heuristic starting from the user's pin. POIs come out in an order that minimizes backtracking. Good enough for prototype purposes; a proper TSP solver would do marginally better.
+A nearest-neighbor TSP heuristic starting from the pin, so the stops come out in an order that minimizes backtracking. Good enough for a prototype; a real TSP solver would do marginally better.
 
 ---
 
 ## Stage 4: Route building
 
-[`Trace/Data/RouteBuilder.swift`](../Trace/Data/RouteBuilder.swift)
+[`worker/src/google.ts` → `walkingLoop`](../worker/src/google.ts)
 
-For each consecutive POI pair (and the closing leg back to POI 1):
+One Google **Directions** call in `walking` mode: origin and destination are the first stop, the rest are intermediate waypoints, closing the loop. From the response it takes:
 
-1. Build an `MKDirections.Request` with `transportType = .walking`.
-2. Take the resulting route's polyline coordinates.
-3. Append them to the waypoint list. The first and last (which are the POI coordinates) get the POI name and a numeric label; intermediate points are unlabelled and only contribute to the polyline geometry.
+- the **overview polyline** (decoded to coordinates — the line drawn on the map),
+- the **total length** (sum of leg distances — the run's real measured distance),
+- the **cumulative distance at each stop** (so Claude can pace the story).
 
-Failure modes:
-- If `MKDirections` finds no walking route for a leg (two POIs across water with no pedestrian path), that segment falls back to a straight line. The rest of the loop is still real walking geometry. This isn't an ideal solution.
-- Apple rate-limits `MKDirections` but generously enough that 6-8 sequential calls per generation is well within budget.
+The decoded polyline becomes the waypoint list; each named stop labels its nearest polyline point so the detail screen can show numbered pins and a "what you'll pass" list.
 
 ---
 
-## Stage 5: Distance refinement
+## Stage 5: Distance control
 
-[`ClaudeAIService.buildBestLoop`](../Trace/Data/ClaudeAIService.swift)
+[`worker/src/index.ts` → `buildRoute`](../worker/src/index.ts)
 
-After the first walking route is built, the actual polyline distance is measured. If it's well off the requested distance:
+This is the guardrail that keeps a 21 km request from returning a 140 km loop. Walking routes near airports, water, or highways can balloon far past the straight-line estimate, so the Worker **measures and adjusts**:
 
-- **< 70% of target**: target radius × 1.5, desired count + 1, re-run stages 2-4.
-- **> 150% of target**: target radius / 1.4, desired count − 1, re-run stages 2-4.
-- **Otherwise**: keep the first attempt.
+- Build the loop, measure `ratio = actual / requested`.
+- **0.6 ≤ ratio ≤ 1.5** → accept.
+- **ratio > 1.5** (too long) → pull the radius in (`× 0.6`) and use fewer stops, retry.
+- **ratio < 0.6** (too short) → spread out (`× 1.4`), add a stop, retry.
+- Up to 3 passes (each is one Directions call); the closest-to-target pass is kept.
+- It also never selects stops beyond `radius × 2.5`, so a sparse area can't pull in places tens of km away.
 
-Exactly one refinement pass. `MKDirections` calls add latency, but this is negligible compared to Claude latency. The route the user sees is whichever pass landed closer to the requested distance.
+If even the best pass is still over **1.6×** the request (e.g. an airport with no walkable loop near that length), the Worker **rejects** the route and returns an empty one. The app then draws a correct-length geometric loop with a textures-only story — a sane fallback rather than a nonsensical distance.
 
 ---
 
 ## Stage 6: Prompt construction
 
-[`worker/src/index.ts`](../worker/src/index.ts)
+[`worker/src/claude.ts`](../worker/src/claude.ts)
 
 **System prompt** sets the voice (Atlas Obscura — quirky, literary, dry, observational) and the JSON schema. Key rules:
 
-- When given a POI list: reference them by name; do not invent additional named places.
-- When not given a POI list: write about textures and types; do not invent named businesses, statues, or streets.
-- Do not fabricate historical facts; generalize when unsure.
+- Given a POI list: reference them by name; don't invent additional named places.
+- Without one: write about textures and types; don't invent named businesses, statues, or streets.
+- Never fabricate historical facts; generalize when unsure.
 
 **User prompt** includes:
 
-- Coordinates and city hint.
-- **The actual measured route length**, with an explicit instruction to anchor the story to it ("do not write '10 km' if the loop is 4 km").
-- The ordered POI list with cumulative km-from-start for each:
+- Coordinates and the resolved city.
+- The **actual measured route length**, with an explicit instruction to anchor the story to it ("do not write '10 km' if the loop is 4 km").
+- The ordered stops with cumulative km-from-start:
   ```
-  1. Brooklyn Bridge (~0.0 km in)
-  2. City Hall Park (~1.2 km in)
-  3. South Street Seaport (~2.8 km in)
+  1. Our Lady of Pompeii Church (~0.0 km in)
+  2. Patchin Place (~1.0 km in)
+  3. St. Patrick's Old Cathedral (~2.1 km in)
   ```
-  So Claude can reference the rhythm of the run ("around the four-kilometer mark…").
+  so Claude can reference the rhythm of the run ("around the two-kilometer mark…").
+
+Model: **Claude Opus** (`claude-opus-4-7`) for editorial prose quality.
 
 ---
 
-## Worker architecture
+## Worker shape & backward compatibility
 
-[`worker/src/index.ts`](../worker/src/index.ts), ~150 lines of TypeScript.
+[`worker/src/index.ts`](../worker/src/index.ts)
 
-- `POST /` — accepts `{lat, lng, distanceKm, vibe, cityHint?, pois?}`, returns `{title, hook, story, postRunMove}`.
-- `GET /` — health check, returns `"Trace AI worker is alive."`.
-- `OPTIONS /` — CORS preflight, in case anyone tests from a browser.
+The Worker accepts two request shapes, distinguished by whether the body carries a `pois` array:
 
-Deployed via `wrangler deploy`. The `ANTHROPIC_API_KEY` is a Worker secret uploaded via `wrangler secret put` — never on disk locally, never in the repo, never in the iOS binary.
+- **Cross-platform (RN) path** — body is just `{ lat, lng, distanceKm, vibe }`. The Worker runs the full geo pipeline above and returns `{ title, hook, story, postRunMove, waypoints, distanceKm, city, country }`.
+- **Legacy (native iOS) path** — the SwiftUI app runs `MKLocalSearch` / `MKDirections` on-device and sends a pre-built `pois` array. The Worker skips geo and just writes the entry, returning `{ title, hook, story, postRunMove }`. This keeps the original Swift app working against the same backend.
 
-Latency: typically 5-10s for the Claude call (Opus 4.7 is not fast). The Worker itself adds < 100ms.
+Other routes: `GET /` is a health check; `OPTIONS /` is CORS preflight.
+
+Both API keys — `ANTHROPIC_API_KEY` and a server-side `GOOGLE_MAPS_API_KEY` (Places + Directions + Geocoding) — are Worker secrets set via `wrangler secret put`. They are never on disk locally, never in the repo, never in either app binary.
 
 ---
 
-## Service selection
+## Service selection & offline mock
 
-[`Trace/Config.swift`](../Trace/Config.swift)
+[`mobile/src/config.ts`](../mobile/src/config.ts) · [`mobile/src/services/aiService.ts`](../mobile/src/services/aiService.ts)
 
-```swift
-enum Config {
-    static let aiWorkerURL: URL? = URL(string: "https://trace-ai.trace-demo.workers.dev")
-}
+`AI_WORKER_URL` in `config.ts` points at the deployed Worker. The `makeAIService()` factory returns the real `ClaudeAIService` when a URL is set, and a `MockAIService` (hand-written templates + a geometric loop) otherwise — so the app runs fully offline for demos. The factory is the only place that knows the difference; screens and the store just see an `AIService`.
 
-enum AIServiceFactory {
-    static func make() -> AIService {
-        if let url = Config.aiWorkerURL {
-            return ClaudeAIService(workerURL: url)
-        }
-        return MockAIService()
-    }
+If the Worker returns an empty `waypoints` array (the Stage 5 rejection), the client draws a geometric `circularLoop` of the requested length, so the map always shows a sensibly-sized loop.
+
+---
+
+## Honest constraints in the data model
+
+[`mobile/src/models/run.ts`](../mobile/src/models/run.ts)
+
+```ts
+interface Run {
+  distanceKm: number;            // always real (polyline-derived for generated runs)
+  elevationGainM: number | null; // null for generated runs — no elevation source yet
+  surface: Surface | null;       // null for generated runs — not inferred
+  // ...
 }
 ```
 
-If `aiWorkerURL` is nil, the app falls back to `MockAIService` with hand-written templates. The factory is the only place that knows about the choice; the rest of the app (views, store) just sees an `AIService`.
-
----
-
-## Honest constraints baked into the data model
-
-[`Trace/Models/Run.swift`](../Trace/Models/Run.swift)
-
-```swift
-struct Run {
-    let distanceKm: Double         // always real (polyline-derived for generated runs)
-    let elevationGainM: Int?       // nil for generated runs — later versions should include elevation info
-    let surface: Surface?          // nil for generated runs — later versions should include surface info
-    // ...
-}
-```
-
-The detail screen's facts row hides any field that's nil. Generated runs show only their measured distance. Curated runs (which keep their hand-set numbers) show all three. The choice is deliberate: shipping fabricated numbers in a content-led brand's prototype would be the wrong signal.
+The detail screen hides any field that's null. Generated runs show only their measured distance; curated runs (with hand-set numbers) show all three. Shipping fabricated elevation or surface numbers in a content-led brand's prototype would be the wrong signal.

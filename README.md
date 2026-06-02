@@ -56,7 +56,7 @@ See [`mobile/README.md`](mobile/README.md) for physical-device builds, the signi
 
 ## The SwiftUI original
 
-Trace was first built as a native SwiftUI app; that version still lives in [`Trace/`](Trace/) on this branch (and is what `main` holds). The React Native app is a faithful port of its design and product. The Worker stays **backward-compatible** with the Swift app's contract, so both front-ends share one backend. See [docs/rebuild.md](docs/rebuild.md) for the port story and the key architectural change (MapKit on-device → server-side Google pipeline).
+Trace was first built as a native SwiftUI app; that version still lives in [`Trace/`](Trace/) on this branch, and is the whole of the [`swiftui`](https://github.com/ian52n/trace/tree/swiftui) branch (the original iOS-only version). The React Native app is a faithful port of its design and product. The Worker stays **backward-compatible** with the Swift app's contract, so both front-ends share one backend. See [docs/rebuild.md](docs/rebuild.md) for the port story and the key architectural change (MapKit on-device → server-side Google pipeline).
 
 To run the SwiftUI version: `open Trace.xcodeproj` and ⌘R against an iOS 17+ simulator.
 

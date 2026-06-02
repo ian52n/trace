@@ -1,6 +1,6 @@
 # Rebuild: SwiftUI → React Native
 
-Trace was first built as a native **SwiftUI** app ([`Trace/`](../Trace/), and what `main` holds). This branch is the **React Native (Expo)** rebuild ([`mobile/`](../mobile/)) that runs the same product on **iOS and Android** from one codebase. This doc covers what changed and why.
+Trace was first built as a native **SwiftUI** app ([`Trace/`](../Trace/), also kept standalone as the [`swiftui`](https://github.com/ian52n/trace/tree/swiftui) branch). This branch is the **React Native (Expo)** rebuild ([`mobile/`](../mobile/)) that runs the same product on **iOS and Android** from one codebase. This doc covers what changed and why.
 
 ## Why rebuild at all
 

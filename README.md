@@ -13,7 +13,7 @@ A portfolio project, originally built as a take-home for Atlas Obscura's *AI-Nat
 
 | Discover | Generate | A run, generated end-to-end |
 |---|---|---|
-| ![Discover feed](docs/screenshots/discover.png) | ![Generate inputs](docs/screenshots/generate.png) | ![Generated run detail](docs/screenshots/detail-generated.png) |
+| <img src="docs/screenshots/discover.png" width="240" alt="Discover feed" /> | <img src="docs/screenshots/generate.png" width="240" alt="Generate inputs" /> | <img src="docs/screenshots/detail-generated.png" width="240" alt="Generated run detail" /> |
 | The curated atlas. Real photos, AO-style cards. | Drop a pin, pick a distance and a vibe. | A real walking loop through real POIs, with Claude's writeup. |
 
 ## What it is

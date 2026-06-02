@@ -2,7 +2,11 @@
 
 A travel app for passionate runners. **Runs as destinations** — not routes overlaid on cities.
 
-Built for the Atlas Obscura AI-Native Mobile & Product Engineer take-home.
+> ⚡ **This is the original native-iOS (SwiftUI) version.** The project was rebuilt as a **cross-platform React Native app (iOS + Android)** — see the **[`react-native` branch](https://github.com/ian52n/trace/tree/react-native)**, which is the repo's default and the primary version. This branch is kept as the iOS-native starting point.
+
+A portfolio project, originally built as a take-home for Atlas Obscura's *AI-Native Mobile & Product Engineer* role.
+
+> **Stack** — Swift · SwiftUI · MapKit · Core Location · Cloudflare Workers · Claude API · XcodeGen
 
 📄 [WRITEUP.md](WRITEUP.md) — the product reasoning behind what's here.
 🏗 [docs/architecture.md](docs/architecture.md) — how the AI generator works under the hood.
@@ -87,6 +91,10 @@ Suggested order, fastest to depth:
 
 ## What's not here yet
 
-No accounts, no Strava import, no social, no onboarding, no settings, no live GPS recording, no app icon, no real hero photos (gradient placeholders), no automated tests.
+No accounts, no Strava import, no social, no onboarding, no settings, no live GPS recording, no automated tests.
 
-The brief was "make one slice feel great." This slice is _runs as destinations + AI-authored runs grounded in real geography_. Everything else got cut to spend the time on the editorial bar of the curated content and the AI generation pipeline.
+The goal was to make one slice feel great. This slice is _runs as destinations + AI-authored runs grounded in real geography_. Everything else got cut to spend the time on the editorial bar of the curated content and the AI generation pipeline.
+
+---
+
+*Trace is an independent portfolio project, originally built as a take-home exercise. It is not affiliated with, authorized by, or endorsed by Atlas Obscura; the brand is referenced only to describe the editorial voice the prototype emulates. Licensed under [Apache 2.0](LICENSE).*

@@ -7,3 +7,7 @@ Trace is two features. The **Discover** tab is a hand-curated atlas of runs arou
 ---
 
 For the engineering pipeline, see [docs/architecture.md](docs/architecture.md). For longer commentary on why this shape, what got cut, what's still rough, and what's next, see [docs/notes.md](docs/notes.md).
+
+---
+
+*This describes the original native-iOS (SwiftUI) version. The project was later rebuilt as a cross-platform React Native app (iOS + Android) — see the [`react-native`](https://github.com/ian52n/trace/tree/react-native) branch, the repo's default. Trace is an independent portfolio project, not affiliated with Atlas Obscura.*

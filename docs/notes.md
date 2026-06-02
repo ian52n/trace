@@ -1,16 +1,16 @@
 # Notes
 
-Extended commentary on Trace — the design calls behind the prototype, what got cut, what's still rough, and what I'd reach for next. The short writeup at [WRITEUP.md](../WRITEUP.md) is what you actually asked for; this is for anyone curious enough to keep reading.
+Extended commentary on Trace — the design calls behind the prototype, what got cut, what's still rough, and what I'd reach for next. [WRITEUP.md](../WRITEUP.md) is the short version; this is for anyone curious enough to keep reading. (This is the original native-iOS version; the project was later rebuilt cross-platform — see the [`react-native`](https://github.com/ian52n/trace/tree/react-native) branch.)
 
 ## Why this shape
 
 Three calls I made early and held:
 
-- **Mobile-native, not a website.** The role title leads with "Mobile," and a runner reaching for this on a Tuesday morning is on their phone, not at a laptop. SwiftUI + MapKit + Core Location is the right canvas, and using on-device Apple APIs (`MKLocalSearch`, `MKDirections`) means the route geometry is fast, accurate, and free.
+- **Mobile-native, not a website.** A runner reaching for this on a Tuesday morning is on their phone, not at a laptop. SwiftUI + MapKit + Core Location is the right canvas, and using on-device Apple APIs (`MKLocalSearch`, `MKDirections`) means the route geometry is fast, accurate, and free.
 
 - **Story-first, not data-first.** Strava and Komoot already win on route data. They will never win on voice. So I optimized for the editorial layer: a serif typeface, generous whitespace, copy that earns its place. The demo lives or dies on whether the writing feels like Atlas Obscura.
 
-- **AI as authorship, not as a chatbot.** The "AI-native" piece isn't a chat surface — it's a generator that produces in-voice content keyed to the user's actual location and intent. This is the bet I think Atlas Obscura should be making: AI that extends a strong editorial brand into places the editors haven't been yet. Claude isn't decorating an experience; it's writing entries for an atlas.
+- **AI as authorship, not as a chatbot.** The "AI-native" piece isn't a chat surface — it's a generator that produces in-voice content keyed to the user's actual location and intent. It's the bet I'd make for any content-led brand: AI that extends a strong editorial voice into places the editors haven't been yet. Claude isn't decorating an experience; it's writing entries for an atlas.
 
 ## What I cut
 

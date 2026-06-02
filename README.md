@@ -18,7 +18,7 @@ A cross-platform portfolio project — **one React Native codebase running nativ
 
 | Discover | Generate | A generated run |
 |---|---|---|
-| ![Discover feed](docs/screenshots/discover.png) | ![Generate inputs](docs/screenshots/generate.png) | ![Generated run detail](docs/screenshots/detail.png) |
+| <img src="docs/screenshots/discover.png" width="240" alt="Discover feed" /> | <img src="docs/screenshots/generate.png" width="240" alt="Generate inputs" /> | <img src="docs/screenshots/detail.png" width="240" alt="Generated run detail" /> |
 | The curated atlas — real photos, editorial cards. | Drop a pin, pick a distance and a vibe. | The route, the real stops you'll pass, and the post-run move. |
 
 ## What it is

@@ -8,6 +8,7 @@ A portfolio project, originally built as a take-home for Atlas Obscura's *AI-Nat
 
 > **Stack** — Swift · SwiftUI · MapKit · Core Location · Cloudflare Workers · Claude API · XcodeGen
 
+🌐 [trace.ian.ai-editor.app](https://trace.ian.ai-editor.app) — the project's web page.
 📄 [WRITEUP.md](WRITEUP.md) — the product reasoning behind what's here.
 🏗 [docs/architecture.md](docs/architecture.md) — how the AI generator works under the hood.
 

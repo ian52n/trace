@@ -2,7 +2,7 @@
 
 A travel app for passionate runners. **Runs as destinations** — not routes overlaid on cities.
 
-> ⚡ **This is the original native-iOS (SwiftUI) version.** The project was rebuilt as a **cross-platform React Native app (iOS + Android)** — see the **[`react-native` branch](https://github.com/ian52n/trace/tree/react-native)**, which is the repo's default and the primary version. This branch is kept as the iOS-native starting point.
+> ⚡ **This is the original native-iOS (SwiftUI) version.** The project was rebuilt as a **cross-platform React Native app (iOS + Android)** — see the **[`main` branch](https://github.com/ian52n/trace)**, which is the repo's default and the primary version. This branch is kept as the iOS-native starting point.
 
 A portfolio project, originally built as a take-home for Atlas Obscura's *AI-Native Mobile & Product Engineer* role.
 

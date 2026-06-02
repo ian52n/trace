@@ -10,4 +10,4 @@ For the engineering pipeline, see [docs/architecture.md](docs/architecture.md). 
 
 ---
 
-*This describes the original native-iOS (SwiftUI) version. The project was later rebuilt as a cross-platform React Native app (iOS + Android) — see the [`react-native`](https://github.com/ian52n/trace/tree/react-native) branch, the repo's default. Trace is an independent portfolio project, not affiliated with Atlas Obscura.*
+*This describes the original native-iOS (SwiftUI) version. The project was later rebuilt as a cross-platform React Native app (iOS + Android) — see the [`main`](https://github.com/ian52n/trace) branch, the repo's default. Trace is an independent portfolio project, not affiliated with Atlas Obscura.*

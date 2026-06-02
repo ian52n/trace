@@ -1,6 +1,6 @@
 # Notes
 
-Extended commentary on Trace — the design calls behind the prototype, what got cut, what's still rough, and what I'd reach for next. [WRITEUP.md](../WRITEUP.md) is the short version; this is for anyone curious enough to keep reading. (This is the original native-iOS version; the project was later rebuilt cross-platform — see the [`react-native`](https://github.com/ian52n/trace/tree/react-native) branch.)
+Extended commentary on Trace — the design calls behind the prototype, what got cut, what's still rough, and what I'd reach for next. [WRITEUP.md](../WRITEUP.md) is the short version; this is for anyone curious enough to keep reading. (This is the original native-iOS version; the project was later rebuilt cross-platform — see the [`main`](https://github.com/ian52n/trace) branch.)
 
 ## Why this shape
 

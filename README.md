@@ -6,6 +6,7 @@ A cross-platform portfolio project — **one React Native codebase running nativ
 
 > **Stack** — React Native · Expo · TypeScript · React Navigation · react-native-maps · Cloudflare Workers · Claude API · Google Maps Platform
 
+🌐 [trace.ian.ai-editor.app](https://trace.ian.ai-editor.app) — the project's web page.
 📄 [WRITEUP.md](WRITEUP.md) — the product reasoning behind what's here.
 🏗 [docs/architecture.md](docs/architecture.md) — how the AI generator works under the hood.
 🔁 [docs/rebuild.md](docs/rebuild.md) — what changed porting SwiftUI → React Native, and why.

@@ -16,10 +16,10 @@ A cross-platform portfolio project — **one React Native codebase running nativ
   <em>Running on Android — the curated feed, a run detail, then generating a run from a pin.</em>
 </p>
 
-| Discover | Generate | A run in detail |
+| Discover | Generate | A generated run |
 |---|---|---|
-| ![Discover feed](docs/screenshots/discover.png) | ![Generate inputs](docs/screenshots/generate.png) | ![Run detail](docs/screenshots/detail.png) |
-| The curated atlas — real photos, editorial cards. | Drop a pin, pick a distance and a vibe. | Every run is a story: the hero, the facts, the writeup. |
+| ![Discover feed](docs/screenshots/discover.png) | ![Generate inputs](docs/screenshots/generate.png) | ![Generated run detail](docs/screenshots/detail.png) |
+| The curated atlas — real photos, editorial cards. | Drop a pin, pick a distance and a vibe. | The route, the real stops you'll pass, and the post-run move. |
 
 ## What it is
 

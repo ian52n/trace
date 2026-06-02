@@ -2,9 +2,9 @@
 
 A travel app for passionate runners. **Runs as destinations** — not routes overlaid on cities.
 
-Built for the Atlas Obscura AI-Native Mobile & Product Engineer take-home.
+A cross-platform portfolio project — **one React Native codebase running natively on iOS and Android** — originally built as a take-home for Atlas Obscura's *AI-Native Mobile & Product Engineer* role, then rebuilt from its SwiftUI prototype (still included — see [The SwiftUI original](#the-swiftui-original)).
 
-This branch is the **cross-platform React Native rebuild** — one codebase running natively on **iOS and Android** — rebuilt from the original SwiftUI prototype (still included, see [The SwiftUI original](#the-swiftui-original)).
+> **Stack** — React Native · Expo · TypeScript · React Navigation · react-native-maps · Cloudflare Workers · Claude API · Google Maps Platform
 
 📄 [WRITEUP.md](WRITEUP.md) — the product reasoning behind what's here.
 🏗 [docs/architecture.md](docs/architecture.md) — how the AI generator works under the hood.
@@ -103,4 +103,8 @@ Fastest to depth, on the React Native side:
 
 No accounts, no Strava import, no social, no onboarding, no settings, no live GPS recording, no automated tests.
 
-The brief was "make one slice feel great." This slice is _runs as destinations + AI-authored runs grounded in real geography, on every phone._ Everything else got cut to spend the time on the editorial bar of the curated content and the generation pipeline.
+The goal was to make one slice feel great. This slice is _runs as destinations + AI-authored runs grounded in real geography, on every phone._ Everything else got cut to spend the time on the editorial bar of the curated content and the generation pipeline.
+
+---
+
+*Trace is an independent portfolio project, originally built as a take-home exercise. It is not affiliated with, authorized by, or endorsed by Atlas Obscura; the brand is referenced only to describe the editorial voice the prototype emulates. Licensed under [Apache 2.0](LICENSE).*

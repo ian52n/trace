@@ -4,7 +4,7 @@ Trace was first built as a native **SwiftUI** app ([`Trace/`](../Trace/), and wh
 
 ## Why rebuild at all
 
-The native app was the right first cut: SwiftUI is the fastest way to make an iOS app *feel* finished, and the role leads with "Mobile." But Atlas Obscura's stack lists **React Native**, and the product is the same on both platforms — there's nothing iOS-specific about "a run is a destination." Rebuilding cross-platform doubles the reachable audience (Android is most of the world's phones) for roughly the same surface area, and it's the honest answer to "build our new native mobile app… alongside our web experience."
+The native app was the right first cut: SwiftUI is the fastest way to make an iOS app *feel* finished. But the product is the same on both platforms — there's nothing iOS-specific about "a run is a destination" — and the target stack for the role was **React Native**. Rebuilding cross-platform doubles the reachable audience (Android is most of the world's phones) for roughly the same surface area.
 
 The React Native version is a faithful port: same two screens, same curated content, same editorial design system (parchment palette, serif body, vibe-keyed gradients), same domain model.
 
